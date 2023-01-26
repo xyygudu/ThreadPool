@@ -1,7 +1,4 @@
-## 话不多说，先放代码
-
-[https://github.com/xyygudu/ThreadPool](https://github.com/xyygudu/ThreadPool)
-
+# ThreadPool C++11
 ## 多线程程序一定好吗？
 
 不一定，要看当前程序的类型来判断，程序的类型有IO密集型和CPU密集型。
