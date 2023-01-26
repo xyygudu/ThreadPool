@@ -70,10 +70,10 @@ inline auto ThreadPool::submitTask(Func &&func, Args &&...args) -> std::future<d
         // 获取锁
         ThreadPoolLock lock(taskMutex_);
         notFullCV_.wait(lock, [this]()->bool { 
-            bool isFull = false;
-            if (tasks_.size() < (size_t)config_.MAX_TASK_NUM) isFull = true;
+            bool notFull = false;
+            if (tasks_.size() < (size_t)config_.MAX_TASK_NUM) notFull = true;
             else std::cout << "task queue is full..." << std::endl;
-            return isFull;
+            return notFull;
         });
         // 如果任务队列不满，则把任务添加进队列
         tasks_.emplace([task]() {(*task)();});
