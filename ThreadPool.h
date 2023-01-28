@@ -37,7 +37,6 @@ public:
 private:
     void addThread(ThreadFlag flag = ThreadFlag::kReserved);// 向线程池中添加一个新线程
     void removeThread(pid_t id);
-    void removeAllThreads();
     void threadFunc(ThreadPtr threadPtr);                   // 线程执行函数
 
     std::list<ThreadPtr> workThreads_;                      // 存放工作线程，使用智能指针是为了能够自动释放Thread
@@ -70,10 +69,10 @@ inline auto ThreadPool::submitTask(Func &&func, Args &&...args) -> std::future<d
         // 获取锁
         ThreadPoolLock lock(taskMutex_);
         notFullCV_.wait(lock, [this]()->bool { 
-            bool notFull = false;
-            if (tasks_.size() < (size_t)config_.MAX_TASK_NUM) notFull = true;
+            bool notfull = false;
+            if (tasks_.size() < (size_t)config_.MAX_TASK_NUM) notfull = true;
             else std::cout << "task queue is full..." << std::endl;
-            return notFull;
+            return notfull;
         });
         // 如果任务队列不满，则把任务添加进队列
         tasks_.emplace([task]() {(*task)();});

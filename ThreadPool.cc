@@ -68,17 +68,6 @@ void ThreadPool::removeThread(pid_t id)
     }
 }
 
-void ThreadPool::removeAllThreads()
-{
-    ThreadPoolLock lock(threadMutex_);
-    // for (auto iter = workThreads_.begin(); iter != workThreads_.end(); ++iter)
-    // {
-    //     if ((*iter)->joinable()) { (*iter)->join(); }
-    //     else { (*iter)->detach(); }
-    // }
-    workThreads_.clear();
-    curThreadNum_.store(0);
-}
 
 int ThreadPool::getWatingThreadNum()
 {
@@ -115,6 +104,7 @@ void ThreadPool::threadFunc(ThreadPtr threadPtr)
                 else{
                     task = std::move(tasks_.front());
                     tasks_.pop();
+                    notFullCV_.notify_all();
                 }
             }
             else
@@ -143,7 +133,9 @@ void ThreadPool::threadFunc(ThreadPtr threadPtr)
                 }
             } 
         }
-        task();                         // 执行任务
+        if (task != nullptr)  task();                    // 执行任务
+        else std::cout << "task is null" << std::endl;
+       
         std::cout << "thread(id: " << threadPtr->getThreadId() << ") is running task" << std::endl;
     }
 }
