@@ -1,4 +1,8 @@
 # ThreadPool C++11
+## 话不多说，先放代码
+
+[https://github.com/xyygudu/ThreadPool](https://github.com/xyygudu/ThreadPool)
+
 ## 多线程程序一定好吗？
 
 不一定，要看当前程序的类型来判断，程序的类型有IO密集型和CPU密集型。
@@ -10,7 +14,7 @@
 
 ## 线程数量怎么确定？
 
-- 线程的创建核销毁是非常"重"的操作，比如PCB的创建。
+- 线程的创建核销毁是非常"重"的操作。
 - 线程本身占用大量内存。每个线程都有自己独立的栈空间。
 - 线程的上下文切换非常耗时。如果cpu大量时间花在切换线程，就没时间处理任务了。
 - 大量线程同时唤醒会使得系统出现瞬时负载量过大导致宕机。
@@ -184,6 +188,7 @@ void ThreadPool::threadFunc(ThreadPtr threadPtr)
                 else{
                     task = std::move(tasks_.front());
                     tasks_.pop();
+                    notFullCV_.notify_all();
                 }
             }
             else
@@ -223,7 +228,7 @@ inline auto ThreadPool::submitTask(Func &&func, Args &&...args) -> std::future<d
             return notfull;
         });
         // 如果任务队列不满，则把任务添加进队列
-        tasks_.emplace([&]() {(*task)();});
+        tasks_.emplace([task]() {(*task)();});
         taskSize = tasks_.size();
         notEmptyCV_.notify_one();
     }
